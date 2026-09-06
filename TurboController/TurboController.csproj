@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Dalamud.NET.Sdk/15.0.0">
+  <PropertyGroup>
+    <Version>0.0.0.1</Version>
+    <!-- Manifest fields (see https://github.com/goatcorp/DalamudPackager/blob/827d88dc/DalamudPackager/DalamudPackager.cs#L420) -->
+    <Author>Peter Truong</Author>
+    <Name>TurboController</Name>
+    <Punchline>Turbo (auto-repeat) for the cross hotbar.</Punchline>
+    <Description>Hold a cross hotbar button and the action under it re-fires on a configurable interval instead of once.
+Controller only. Filters for GCDs, oGCDs, and in/out of combat.</Description>
+    <RepoUrl>https://github.com/petergtruong/TurboController</RepoUrl>
+    <Tags>controller;crossbar;hotbar;turbo</Tags>
+  </PropertyGroup>
+</Project>
