@@ -27,6 +27,8 @@ internal sealed unsafe class CrossbarInjector : IDisposable
     private readonly TurboDecision decision = new();
     private readonly ActionClassifier classifier = new();
     private readonly Stopwatch clock = Stopwatch.StartNew();
+    private readonly FailureGate injectGate = new();
+    private readonly FailureGate learnGate = new();
 
     private readonly Hook<CheckCrossbarBindingsDelegate>? checkCrossbarBindingsHook;
     private readonly Hook<ExecuteSlotDelegate>? executeSlotHook;
@@ -69,6 +71,7 @@ internal sealed unsafe class CrossbarInjector : IDisposable
         executeSlotHook?.Disable();
         executeSlotHook?.Dispose();
         TurboControllerPlugin.HooksReady = false;
+        TurboControllerPlugin.InjectionFailed = false;
     }
 
     private byte CheckCrossbarBindingsDetour(nint a1, nint a2, nint a3, nint a4)
@@ -79,17 +82,29 @@ internal sealed unsafe class CrossbarInjector : IDisposable
         try
         {
             var ui = UIInputData.Instance();
-            if (ui != null)
+            if (ui != null && !injectGate.IsTripped)
             {
                 // UIInputData : AtkInputData : InputData, so InputData is at offset 0.
                 input = (InputData*)ui;
                 original = input->GamepadInputs.ButtonsPressed;
                 Inject(input);
+                injectGate.RecordSuccess();
             }
         }
         catch (Exception ex)
         {
-            TurboControllerPlugin.Log.Error(ex, "[TurboController] injection failed");
+            // We check for multiple failures, we need to stop injection if we keep failing or else we encounter log spam.
+            if (injectGate.RecordFailure())
+            {
+                TurboControllerPlugin.Log.Error(ex, "[TurboController] injection failed");
+
+                if (injectGate.IsTripped)
+                {
+                    TurboControllerPlugin.InjectionFailed = true;
+                    TurboControllerPlugin.Log.Error(
+                        "[TurboController] injection failed repeatedly; turbo is now inactive for this session");
+                }
+            }
         }
 
         insideCrossbarCheck = true;
@@ -149,16 +164,18 @@ internal sealed unsafe class CrossbarInjector : IDisposable
     {
         try
         {
-            if (insideCrossbarCheck && currentButton != 0 && slot != null)
+            if (insideCrossbarCheck && currentButton != 0 && slot != null && !learnGate.IsTripped)
             {
                 var isAction = slot->ApparentSlotType == RaptureHotbarModule.HotbarSlotType.Action;
                 var kind = classifier.Classify(slot->ApparentActionId, isAction);
                 decision.OnLearn(currentButton, slot->ApparentActionId, kind);
+                learnGate.RecordSuccess();
             }
         }
         catch (Exception ex)
         {
-            TurboControllerPlugin.Log.Error(ex, "[TurboController] learn failed");
+            if (learnGate.RecordFailure())
+                TurboControllerPlugin.Log.Error(ex, "[TurboController] learn failed");
         }
 
         return executeSlotHook!.Original(module, slot);
