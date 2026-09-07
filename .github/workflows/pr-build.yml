@@ -1,16 +1,15 @@
-name: PR Builder for TurboController
+name: Build TurboController
 
 on:
   pull_request:
+    branches: [ master ]
+  push:
     branches: [ master ]
 
 jobs:
 
   build:
     runs-on: windows-2022
-
-    env:
-      Solution_Name: TurboController
 
     steps:
     - name: Checkout
@@ -30,7 +29,7 @@ jobs:
       run: dotnet build --configuration Release
 
     - name: Test with dotnet
-      run: dotnet test --configuration Release
+      run: dotnet test --configuration Release --no-build
 
     - name: Store artifacts
       uses: actions/upload-artifact@v4
