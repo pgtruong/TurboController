@@ -2,4 +2,7 @@
   <Project Path="TurboController/TurboController.csproj">
     <Platform Project="x64" />
   </Project>
+  <Project Path="TurboController.Tests/TurboController.Tests.csproj">
+    <Platform Project="x64" />
+  </Project>
 </Solution>
