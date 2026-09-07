@@ -6,8 +6,8 @@
     <Platform>x64</Platform>
     <Author>Uraro</Author>
     <Name>Turbo Controller</Name>
-    <Punchline>Turbo (auto-repeat) for the cross hotbar.</Punchline>
-    <Description>Hold a cross hotbar button and the action under it re-fires on a configurable interval instead of once.</Description>
+    <Punchline>Hold skill to cast for controller!</Punchline>
+    <Description>Allows holding buttons from the cross hotbar (D-Pad + ABXY) to repeatedly attempt to cast on a configurable interval.</Description>
     <RepoUrl>https://github.com/petergtruong/TurboController</RepoUrl>
     <Tags>controller;crossbar;hotbar;turbo</Tags>
   </PropertyGroup>
