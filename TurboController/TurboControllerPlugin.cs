@@ -19,6 +19,13 @@ public sealed class TurboControllerPlugin : IDalamudPlugin
     /// </summary>
     internal static bool HooksReady { get; set; }
 
+    /// <summary>
+    /// True when injection threw so often that it was switched off at runtime.
+    /// Distinct from <see cref="HooksReady"/>, which is about load-time signature
+    /// resolution.
+    /// </summary>
+    internal static bool InjectionFailed { get; set; }
+
     public Configuration Configuration { get; init; }
 
     public readonly WindowSystem WindowSystem = new("TurboController");
@@ -29,6 +36,7 @@ public sealed class TurboControllerPlugin : IDalamudPlugin
     public TurboControllerPlugin()
     {
         Configuration = PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
+        Configuration.Initialise(PluginInterface);
 
         injector = new CrossbarInjector(Configuration);
 
@@ -48,8 +56,6 @@ public sealed class TurboControllerPlugin : IDalamudPlugin
         PluginInterface.UiBuilder.OpenConfigUi -= ToggleConfigUi;
 
         WindowSystem.RemoveAllWindows();
-
-        ConfigWindow.Dispose();
     }
 
     public void ToggleConfigUi() => ConfigWindow.Toggle();

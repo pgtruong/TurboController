@@ -5,7 +5,7 @@ using Dalamud.Bindings.ImGui;
 
 namespace TurboController.Windows;
 
-public sealed class ConfigWindow : Window, IDisposable
+public sealed class ConfigWindow : Window
 {
     private readonly Configuration configuration;
 
@@ -15,8 +15,6 @@ public sealed class ConfigWindow : Window, IDisposable
         Size = new Vector2(380, 300);
         SizeCondition = ImGuiCond.FirstUseEver;
     }
-
-    public void Dispose() { }
 
     /// <summary>
     /// Helper function for the sliders, mainly to let people know you can edit with ctrl + click.
@@ -48,6 +46,15 @@ public sealed class ConfigWindow : Window, IDisposable
             ImGui.Separator();
         }
 
+        if (TurboControllerPlugin.InjectionFailed)
+        {
+            ImGui.TextColored(new Vector4(1f, 0.4f, 0.4f, 1f), "Turbo switched off after repeated errors.");
+            ImGui.TextWrapped(
+                "Injection threw on every frame, so it was disabled to protect your " +
+                "framerate. Check /xllog for errors, and try reloading the plugin.");
+            ImGui.Separator();
+        }
+
         var enabled = settings.Enabled;
         if (ImGui.Checkbox("Enable hold to cast", ref enabled))
         {
@@ -57,7 +64,7 @@ public sealed class ConfigWindow : Window, IDisposable
 
         var interval = settings.IntervalMs;
         if (ImGui.SliderInt("Repeat interval (ms)", ref interval, TurboDecision.MinIntervalMs, 1000, "%d", ImGuiSliderFlags.AlwaysClamp))
-            settings.IntervalMs = Math.Max(TurboDecision.MinIntervalMs, interval);
+            settings.IntervalMs = interval;
         // Persist on release, not on every frame of the drag: the callback fires on
         // each changed frame, which would write the config file dozens of times.
         if (ImGui.IsItemDeactivatedAfterEdit())
@@ -66,17 +73,20 @@ public sealed class ConfigWindow : Window, IDisposable
 
         var jitter = settings.JitterMs;
         if (ImGui.SliderInt("Repeat variance (+/- ms)", ref jitter, 0, 200, "%d", ImGuiSliderFlags.AlwaysClamp))
-            settings.JitterMs = Math.Max(0, jitter);
+            settings.JitterMs = jitter;
         if (ImGui.IsItemDeactivatedAfterEdit())
             configuration.Save();
         SliderHint();
 
         var initialDelay = settings.InitialDelayMs;
         if (ImGui.SliderInt("Initial delay (ms)", ref initialDelay, 0, 1000, "%d", ImGuiSliderFlags.AlwaysClamp))
-            settings.InitialDelayMs = Math.Max(0, initialDelay);
+            // 0 to use repeat interval, otherwise defaults to 50 ms at lowest.
+            settings.InitialDelayMs = initialDelay == 0
+                ? 0
+                : Math.Max(TurboDecision.MinIntervalMs, initialDelay);
         if (ImGui.IsItemDeactivatedAfterEdit())
             configuration.Save();
-        SliderHint("Gap between your real press and the first repeat. 0 uses the repeat interval.");
+        SliderHint("Gap between your real press and the first repeat.");
 
         ImGui.Separator();
         ImGui.TextUnformatted("Repeat which actions");

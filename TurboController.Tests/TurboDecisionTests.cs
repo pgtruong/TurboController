@@ -191,4 +191,52 @@ public class TurboDecisionTests
         Assert.True(d.ShouldRepeat(Cross, 1250, Settings(), inCombat: true));
         Assert.False(d.ShouldRepeat(circle, 1250, Settings(), inCombat: true));
     }
+
+    [Fact]
+    public void ClampsASubFloorInitialDelayToTheMinimum()
+    {
+        var s = Settings();
+        s.InitialDelayMs = 10;
+
+        var d = Decision();
+        d.OnGenuinePress(Cross, 1000, s);
+
+        // 10ms is below the 50ms floor, so the first repeat lands at +50ms, not +10ms.
+        Assert.False(d.ShouldRepeat(Cross, 1000 + TurboDecision.MinIntervalMs - 1, s, inCombat: true));
+        Assert.True(d.ShouldRepeat(Cross, 1000 + TurboDecision.MinIntervalMs, s, inCombat: true));
+    }
+
+    [Fact]
+    public void AppliesTheFullPositiveJitterRange()
+    {
+        var s = Settings();
+        s.IntervalMs = 250;
+        s.JitterMs = 200;
+
+        // Random.Next(lo, hi) has an exclusive upper bound, so the largest value the
+        // source can return is hi - 1. OnRepeatFired must pass hi = JitterMs + 1 for
+        // maximum positive jitter to be reachable at all.
+        var d = new TurboDecision((lo, hi) => hi - 1);
+        d.OnGenuinePress(Cross, 1000, s);
+        d.OnRepeatFired(Cross, 1000, s);
+
+        Assert.False(d.ShouldRepeat(Cross, 1449, s, inCombat: true));
+        Assert.True(d.ShouldRepeat(Cross, 1450, s, inCombat: true));
+    }
+
+    [Fact]
+    public void QueryingAnUntouchedButtonReportsNothingAndCreatesNoState()
+    {
+        const ushort square = 1 << 6;
+
+        var d = Decision();
+
+        // Pure queries against a button that was never pressed.
+        Assert.Equal(ActionKind.Unknown, d.KindOf(square));
+        Assert.False(d.ShouldRepeat(square, 9999, Settings(), inCombat: true));
+        d.OnRelease(square);
+
+        // None of the above may have started a turbo clock for it.
+        Assert.False(d.ShouldRepeat(square, 999_999, Settings(), inCombat: true));
+    }
 }

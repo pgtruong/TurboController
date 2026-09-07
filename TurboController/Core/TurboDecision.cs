@@ -34,8 +34,8 @@ public sealed class TurboSettings
 
 /// <summary>
 /// Checks the state and based on settings, decides whether we run turbo or not on the hotkey.
-/// This is per button based, so each button has their own set of settings, meaning you could
-/// simultaneously hold two buttons and they'd both trigger with their own settings and states.
+/// Settings are global, but timing and learned-action <em>state</em> is tracked per button, so
+/// holding two buttons at once gives each its own clock and its own learned action.
 /// </summary>
 public sealed class TurboDecision
 {
@@ -44,8 +44,10 @@ public sealed class TurboDecision
     public const int MinIntervalMs = 50;
 
     /// <summary>
-    /// The eight crossbar buttons are exactly bits 0-7 of GamepadButtonsFlags
-    /// (DPad up/down/left/right, Triangle, Cross, Square, Circle).
+    /// The eight crossbar buttons are exactly bits 0-7 of GamepadButtonsFlags, in this
+    /// order: DPadUp, DPadLeft, DPadDown, DPadRight, North, East, South, West. Face-button
+    /// labels depend on the controller layout, so the flags are named by direction, not by
+    /// Triangle/Circle/Cross/Square.
     /// </summary>
     public const ushort CrossbarButtonMask = 0x00FF;
 
@@ -84,6 +86,13 @@ public sealed class TurboDecision
     }
 
     /// <summary>
+    /// Lookup that does not create state. Every read path uses this so that merely
+    /// asking about a button cannot start tracking it.
+    /// </summary>
+    private ButtonState? PeekState(ushort bit) =>
+        states.TryGetValue(bit, out var state) ? state : null;
+
+    /// <summary>
     /// The player physically pressed the button. This starts the turbo clock —
     /// without it nothing ever repeats, which guarantees turbo can never fire
     /// for a button the player never pressed.
@@ -118,7 +127,9 @@ public sealed class TurboDecision
     /// </summary>
     public void OnRelease(ushort bit)
     {
-        var state = StateFor(bit);
+        var state = PeekState(bit);
+        if (state == null) return;
+
         state.Running = false;
         state.Kind = ActionKind.Unknown;
     }
@@ -135,7 +146,7 @@ public sealed class TurboDecision
     /// <summary>
     /// Helper function to check what kind of action our state is at.
     /// </summary>
-    public ActionKind KindOf(ushort bit) => StateFor(bit).Kind;
+    public ActionKind KindOf(ushort bit) => PeekState(bit)?.Kind ?? ActionKind.Unknown;
 
     /// <summary>
     /// Whether an injected repeat is due for this button right now.
@@ -144,8 +155,8 @@ public sealed class TurboDecision
     {
         if (!settings.Enabled) return false;
 
-        var state = StateFor(bit);
-        if (!state.Running) return false;
+        var state = PeekState(bit);
+        if (state == null || !state.Running) return false;
         if (nowMs - state.LastFireMs < state.RepeatDelay) return false;
         if (!settings.TurboOutOfCombat && !inCombat) return false;
 

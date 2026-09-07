@@ -20,7 +20,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\TurboController\TurboDecision.cs" Link="TurboDecision.cs" />
+    <!--
+      The plugin project uses Dalamud.NET.Sdk and cannot be referenced from a plain
+      test project without dragging in the Dalamud assemblies, which are only present
+      on a machine with the dev hooks installed. Everything under TurboController/Core
+      is deliberately Dalamud-free, so it is compiled into the test assembly directly.
+      Keep this a glob: new core files must not need a csproj edit to be covered.
+    -->
+    <Compile Include="..\TurboController\Core\*.cs" Link="Core\%(Filename)%(Extension)" />
   </ItemGroup>
 
 </Project>

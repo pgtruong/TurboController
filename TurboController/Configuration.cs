@@ -1,4 +1,5 @@
 using Dalamud.Configuration;
+using Dalamud.Plugin;
 
 namespace TurboController;
 
@@ -13,5 +14,10 @@ public sealed class Configuration : IPluginConfiguration
     /// </summary>
     public TurboSettings Settings { get; set; } = new();
 
-    public void Save() => TurboControllerPlugin.PluginInterface.SavePluginConfig(this);
+    private IDalamudPluginInterface pluginInterface = null!;
+
+    public void Initialise(IDalamudPluginInterface pluginInterface) =>
+        this.pluginInterface = pluginInterface;
+
+    public void Save() => pluginInterface.SavePluginConfig(this);
 }

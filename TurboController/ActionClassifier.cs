@@ -26,7 +26,8 @@ internal sealed class ActionClassifier
     /// </summary>
     public ActionKind Classify(uint actionId, bool isActionSlot)
     {
-        // base cases for non combative actions (GCDs and oGCDS))
+        // Base cases: a slot holding something that is not an action (item, macro, mount)
+        // is never a GCD or an oGCD, and an empty slot has nothing to classify.
         if (!isActionSlot) return ActionKind.NonAction;
         if (actionId == 0) return ActionKind.Unknown;
 
