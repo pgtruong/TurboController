@@ -13,7 +13,7 @@ make the official Dalamud repo since it may be considered automation.
 | Enable hold to cast | on | Master switch. Off means every button behaves stock. |
 | Repeat interval | 250 ms | Gap between repeats. Floor is 50 ms. |
 | Repeat variance | 0 ms | Randomises each interval by ± this much. |
-| Initial delay | 0 ms | Gap between your real press and the *first* repeat. 0 uses the repeat interval. |
+| Initial delay | 0 ms | Gap between your real press and the *first* repeat. |
 | GCDs | on | Repeat actions that share the global cooldown. |
 | Off-GCD abilities | on | Repeat abilities on their own cooldown. |
 | Repeat out of combat | off | When off, a held button fires once outside combat. |
@@ -26,8 +26,6 @@ Items, macros and emotes always repeat while turbo is on for this version, not s
 dotnet build .\TurboController\TurboController.csproj -c Release
 dotnet test .\TurboController.Tests\TurboController.Tests.csproj
 ```
-
-Output lands in `TurboController/bin/x64/Release/TurboController.dll`.
 
 ### Activating in-game
 
