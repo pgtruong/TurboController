@@ -8,7 +8,7 @@
     <Name>Turbo Controller</Name>
     <Punchline>Hold skill to cast for controller!</Punchline>
     <Description>Allows holding buttons from the cross hotbar (D-Pad + ABXY) to repeatedly attempt to cast on a configurable interval.</Description>
-    <RepoUrl>https://github.com/petergtruong/TurboController</RepoUrl>
+    <RepoUrl>https://github.com/pgtruong/TurboController</RepoUrl>
     <Tags>controller;crossbar;hotbar;turbo</Tags>
   </PropertyGroup>
 </Project>
