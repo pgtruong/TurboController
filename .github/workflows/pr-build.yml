@@ -29,6 +29,9 @@ jobs:
     - name: Build with dotnet
       run: dotnet build --configuration Release
 
+    - name: Test with dotnet
+      run: dotnet test --configuration Release
+
     - name: Store artifacts
       uses: actions/upload-artifact@v4
       with:
@@ -36,4 +39,3 @@ jobs:
         path: .\TurboController\bin\x64\Release\TurboController\*
         if-no-files-found: error
         retention-days: 1
-
