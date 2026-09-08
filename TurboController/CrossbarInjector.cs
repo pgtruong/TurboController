@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using Dalamud.Game.ClientState.Conditions;
+using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Hooking;
 using FFXIVClientStructs.FFXIV.Client.System.Input;
 using FFXIVClientStructs.FFXIV.Client.UI;
@@ -132,6 +133,8 @@ internal sealed unsafe class CrossbarInjector : IDisposable
         var held = (ushort)input->GamepadInputs.Buttons & TurboDecision.CrossbarButtonMask;
         var pressed = (ushort)input->GamepadInputs.ButtonsPressed & TurboDecision.CrossbarButtonMask;
         var inCombat = TurboControllerPlugin.Condition[ConditionFlag.InCombat];
+        var weaponDrawn = TurboControllerPlugin.Objects.LocalPlayer?.StatusFlags
+            .HasFlag(StatusFlags.WeaponOut) ?? false;
 
         for (var i = 0; i < 8; i++)
         {
@@ -146,7 +149,7 @@ internal sealed unsafe class CrossbarInjector : IDisposable
             }
             else if (isHeld)
             {
-                if (decision.ShouldRepeat(bit, now, settings, inCombat))
+                if (decision.ShouldRepeat(bit, now, settings, inCombat, weaponDrawn))
                 {
                     input->GamepadInputs.ButtonsPressed |= (GamepadButtonsFlags)bit;
                     decision.OnRepeatFired(bit, now, settings);

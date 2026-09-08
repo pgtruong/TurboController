@@ -30,6 +30,7 @@ public sealed class TurboSettings
     public bool TurboGcds = true;
     public bool TurboOgcds = true;
     public bool TurboOutOfCombat;
+    public bool TurboWeaponDrawn;
 }
 
 /// <summary>
@@ -151,14 +152,18 @@ public sealed class TurboDecision
     /// <summary>
     /// Whether an injected repeat is due for this button right now.
     /// </summary>
-    public bool ShouldRepeat(ushort bit, long nowMs, TurboSettings settings, bool inCombat)
+    public bool ShouldRepeat(ushort bit, long nowMs, TurboSettings settings, bool inCombat, bool weaponDrawn)
     {
         if (!settings.Enabled) return false;
 
         var state = PeekState(bit);
         if (state == null || !state.Running) return false;
         if (nowMs - state.LastFireMs < state.RepeatDelay) return false;
-        if (!settings.TurboOutOfCombat && !inCombat) return false;
+
+        var combatGateOpen = settings.TurboOutOfCombat
+            || inCombat
+            || (settings.TurboWeaponDrawn && weaponDrawn);
+        if (!combatGateOpen) return false;
 
         return state.Kind switch
         {

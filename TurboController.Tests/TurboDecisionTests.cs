@@ -16,6 +16,7 @@ public class TurboDecisionTests
         TurboGcds = true,
         TurboOgcds = true,
         TurboOutOfCombat = false,
+        TurboWeaponDrawn = false,
     };
 
     // No jitter, so timing assertions are exact.
@@ -25,7 +26,7 @@ public class TurboDecisionTests
     public void DoesNotRepeatWithoutAGenuinePress()
     {
         var d = Decision();
-        Assert.False(d.ShouldRepeat(Cross, 100_000, Settings(), inCombat: true));
+        Assert.False(d.ShouldRepeat(Cross, 100_000, Settings(), inCombat: true, weaponDrawn: false));
     }
 
     [Fact]
@@ -33,7 +34,7 @@ public class TurboDecisionTests
     {
         var d = Decision();
         d.OnGenuinePress(Cross, 1000, Settings());
-        Assert.False(d.ShouldRepeat(Cross, 1249, Settings(), inCombat: true));
+        Assert.False(d.ShouldRepeat(Cross, 1249, Settings(), inCombat: true, weaponDrawn: false));
     }
 
     [Fact]
@@ -41,7 +42,7 @@ public class TurboDecisionTests
     {
         var d = Decision();
         d.OnGenuinePress(Cross, 1000, Settings());
-        Assert.True(d.ShouldRepeat(Cross, 1250, Settings(), inCombat: true));
+        Assert.True(d.ShouldRepeat(Cross, 1250, Settings(), inCombat: true, weaponDrawn: false));
     }
 
     [Fact]
@@ -50,7 +51,7 @@ public class TurboDecisionTests
         var d = Decision();
         d.OnGenuinePress(Cross, 1000, Settings());
         d.OnRelease(Cross);
-        Assert.False(d.ShouldRepeat(Cross, 5000, Settings(), inCombat: true));
+        Assert.False(d.ShouldRepeat(Cross, 5000, Settings(), inCombat: true, weaponDrawn: false));
     }
 
     [Fact]
@@ -62,8 +63,8 @@ public class TurboDecisionTests
         var d = Decision();
         d.OnGenuinePress(Cross, 1000, s);
 
-        Assert.False(d.ShouldRepeat(Cross, 1599, s, inCombat: true));
-        Assert.True(d.ShouldRepeat(Cross, 1600, s, inCombat: true));
+        Assert.False(d.ShouldRepeat(Cross, 1599, s, inCombat: true, weaponDrawn: false));
+        Assert.True(d.ShouldRepeat(Cross, 1600, s, inCombat: true, weaponDrawn: false));
     }
 
     [Fact]
@@ -76,8 +77,8 @@ public class TurboDecisionTests
         d.OnGenuinePress(Cross, 1000, s);
         d.OnRepeatFired(Cross, 1600, s);
 
-        Assert.False(d.ShouldRepeat(Cross, 1849, s, inCombat: true));
-        Assert.True(d.ShouldRepeat(Cross, 1850, s, inCombat: true));
+        Assert.False(d.ShouldRepeat(Cross, 1849, s, inCombat: true, weaponDrawn: false));
+        Assert.True(d.ShouldRepeat(Cross, 1850, s, inCombat: true, weaponDrawn: false));
     }
 
     [Fact]
@@ -90,7 +91,7 @@ public class TurboDecisionTests
         d.OnGenuinePress(Cross, 1000, s);
         d.OnLearn(Cross, actionId: 3617, ActionKind.Gcd);
 
-        Assert.False(d.ShouldRepeat(Cross, 2000, s, inCombat: true));
+        Assert.False(d.ShouldRepeat(Cross, 2000, s, inCombat: true, weaponDrawn: false));
     }
 
     [Fact]
@@ -103,7 +104,7 @@ public class TurboDecisionTests
         d.OnGenuinePress(Cross, 1000, s);
         d.OnLearn(Cross, actionId: 7541, ActionKind.OGcd);
 
-        Assert.True(d.ShouldRepeat(Cross, 2000, s, inCombat: true));
+        Assert.True(d.ShouldRepeat(Cross, 2000, s, inCombat: true, weaponDrawn: false));
     }
 
     [Fact]
@@ -117,7 +118,7 @@ public class TurboDecisionTests
         d.OnGenuinePress(Cross, 1000, s);
         d.OnLearn(Cross, actionId: 0, ActionKind.NonAction);
 
-        Assert.True(d.ShouldRepeat(Cross, 2000, s, inCombat: true));
+        Assert.True(d.ShouldRepeat(Cross, 2000, s, inCombat: true, weaponDrawn: false));
     }
 
     [Fact]
@@ -126,7 +127,7 @@ public class TurboDecisionTests
         var d = Decision();
         d.OnGenuinePress(Cross, 1000, Settings());
         Assert.Equal(ActionKind.Unknown, d.KindOf(Cross));
-        Assert.True(d.ShouldRepeat(Cross, 2000, Settings(), inCombat: true));
+        Assert.True(d.ShouldRepeat(Cross, 2000, Settings(), inCombat: true, weaponDrawn: false));
     }
 
     [Fact]
@@ -136,10 +137,42 @@ public class TurboDecisionTests
         var d = Decision();
         d.OnGenuinePress(Cross, 1000, s);
 
-        Assert.False(d.ShouldRepeat(Cross, 2000, s, inCombat: false));
+        Assert.False(d.ShouldRepeat(Cross, 2000, s, inCombat: false, weaponDrawn: false));
 
         s.TurboOutOfCombat = true;
-        Assert.True(d.ShouldRepeat(Cross, 2000, s, inCombat: false));
+        Assert.True(d.ShouldRepeat(Cross, 2000, s, inCombat: false, weaponDrawn: false));
+    }
+
+    [Fact]
+    public void RepeatsOutOfCombatWhenWeaponsAreDrawnAndAllowed()
+    {
+        var s = Settings();
+        s.TurboWeaponDrawn = true;
+        var d = Decision();
+        d.OnGenuinePress(Cross, 1000, s);
+
+        Assert.True(d.ShouldRepeat(Cross, 2000, s, inCombat: false, weaponDrawn: true));
+    }
+
+    [Fact]
+    public void BlocksOutOfCombatWhenWeaponsAreSheathed()
+    {
+        var s = Settings();
+        s.TurboWeaponDrawn = true;
+        var d = Decision();
+        d.OnGenuinePress(Cross, 1000, s);
+
+        Assert.False(d.ShouldRepeat(Cross, 2000, s, inCombat: false, weaponDrawn: false));
+    }
+
+    [Fact]
+    public void IgnoresDrawnWeaponsWhenTheSettingIsOff()
+    {
+        var s = Settings();
+        var d = Decision();
+        d.OnGenuinePress(Cross, 1000, s);
+
+        Assert.False(d.ShouldRepeat(Cross, 2000, s, inCombat: false, weaponDrawn: true));
     }
 
     [Fact]
@@ -150,7 +183,7 @@ public class TurboDecisionTests
         d.OnGenuinePress(Cross, 1000, s);
 
         s.Enabled = false;
-        Assert.False(d.ShouldRepeat(Cross, 2000, s, inCombat: true));
+        Assert.False(d.ShouldRepeat(Cross, 2000, s, inCombat: true, weaponDrawn: false));
     }
 
     [Fact]
@@ -176,8 +209,8 @@ public class TurboDecisionTests
         d.OnGenuinePress(Cross, 1000, s);
         d.OnRepeatFired(Cross, 1000, s);
 
-        Assert.False(d.ShouldRepeat(Cross, 1000 + TurboDecision.MinIntervalMs - 1, s, inCombat: true));
-        Assert.True(d.ShouldRepeat(Cross, 1000 + TurboDecision.MinIntervalMs, s, inCombat: true));
+        Assert.False(d.ShouldRepeat(Cross, 1000 + TurboDecision.MinIntervalMs - 1, s, inCombat: true, weaponDrawn: false));
+        Assert.True(d.ShouldRepeat(Cross, 1000 + TurboDecision.MinIntervalMs, s, inCombat: true, weaponDrawn: false));
     }
 
     [Fact]
@@ -188,8 +221,8 @@ public class TurboDecisionTests
         var d = Decision();
         d.OnGenuinePress(Cross, 1000, Settings());
 
-        Assert.True(d.ShouldRepeat(Cross, 1250, Settings(), inCombat: true));
-        Assert.False(d.ShouldRepeat(circle, 1250, Settings(), inCombat: true));
+        Assert.True(d.ShouldRepeat(Cross, 1250, Settings(), inCombat: true, weaponDrawn: false));
+        Assert.False(d.ShouldRepeat(circle, 1250, Settings(), inCombat: true, weaponDrawn: false));
     }
 
     [Fact]
@@ -202,8 +235,8 @@ public class TurboDecisionTests
         d.OnGenuinePress(Cross, 1000, s);
 
         // 10ms is below the 50ms floor, so the first repeat lands at +50ms, not +10ms.
-        Assert.False(d.ShouldRepeat(Cross, 1000 + TurboDecision.MinIntervalMs - 1, s, inCombat: true));
-        Assert.True(d.ShouldRepeat(Cross, 1000 + TurboDecision.MinIntervalMs, s, inCombat: true));
+        Assert.False(d.ShouldRepeat(Cross, 1000 + TurboDecision.MinIntervalMs - 1, s, inCombat: true, weaponDrawn: false));
+        Assert.True(d.ShouldRepeat(Cross, 1000 + TurboDecision.MinIntervalMs, s, inCombat: true, weaponDrawn: false));
     }
 
     [Fact]
@@ -220,8 +253,8 @@ public class TurboDecisionTests
         d.OnGenuinePress(Cross, 1000, s);
         d.OnRepeatFired(Cross, 1000, s);
 
-        Assert.False(d.ShouldRepeat(Cross, 1449, s, inCombat: true));
-        Assert.True(d.ShouldRepeat(Cross, 1450, s, inCombat: true));
+        Assert.False(d.ShouldRepeat(Cross, 1449, s, inCombat: true, weaponDrawn: false));
+        Assert.True(d.ShouldRepeat(Cross, 1450, s, inCombat: true, weaponDrawn: false));
     }
 
     [Fact]
@@ -233,10 +266,10 @@ public class TurboDecisionTests
 
         // Pure queries against a button that was never pressed.
         Assert.Equal(ActionKind.Unknown, d.KindOf(square));
-        Assert.False(d.ShouldRepeat(square, 9999, Settings(), inCombat: true));
+        Assert.False(d.ShouldRepeat(square, 9999, Settings(), inCombat: true, weaponDrawn: false));
         d.OnRelease(square);
 
         // None of the above may have started a turbo clock for it.
-        Assert.False(d.ShouldRepeat(square, 999_999, Settings(), inCombat: true));
+        Assert.False(d.ShouldRepeat(square, 999_999, Settings(), inCombat: true, weaponDrawn: false));
     }
 }

@@ -111,5 +111,17 @@ public sealed class ConfigWindow : Window
             settings.TurboOutOfCombat = outOfCombat;
             configuration.Save();
         }
+
+        // Disables the weapon unsheathed option if out of combat is toggled
+        ImGui.BeginDisabled(settings.TurboOutOfCombat);
+        var weaponDrawn = settings.TurboWeaponDrawn;
+        if (ImGui.Checkbox("Repeat with weapons drawn", ref weaponDrawn))
+        {
+            settings.TurboWeaponDrawn = weaponDrawn;
+            configuration.Save();
+        }
+        ImGui.EndDisabled();
+        if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
+            ImGui.SetTooltip("Lets an opener repeat before your first hit puts you in combat.");
     }
 }
