@@ -46,6 +46,12 @@ dotnet test .\TurboController.Tests\TurboController.Tests.csproj
 Per Dalamud's [AI policy](https://dalamud.dev/plugin-publishing/ai-policy/), AI involvement in this
 plugin is at the **Pair** level: Active human-AI collaboration throughout. Contribution is roughly equal. All human tested in-game.
 
+## Credits
+
+Plugin icon by [Ayub Irawan](https://www.flaticon.com/authors/ayub-irawan), sourced from
+[Flaticon](https://www.flaticon.com/) and used under their
+[free licence attribution requirement](https://support.flaticon.com/s/article/Attribution-How-when-and-where-FI).
+
 ## License
 
 See [LICENSE.md](LICENSE.md).

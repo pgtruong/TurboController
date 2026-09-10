@@ -49,6 +49,8 @@ jobs:
         $m | Add-Member -NotePropertyName DownloadLinkInstall -NotePropertyValue $url -Force
         $m | Add-Member -NotePropertyName DownloadLinkUpdate  -NotePropertyValue $url -Force
         $m | Add-Member -NotePropertyName DownloadLinkTesting -NotePropertyValue $url -Force
+        $icon = "https://raw.githubusercontent.com/${{ github.repository }}/master/images/icon.png"
+        $m | Add-Member -NotePropertyName IconUrl -NotePropertyValue $icon -Force
         $m | Add-Member -NotePropertyName IsHide -NotePropertyValue $false -Force
         $m | Add-Member -NotePropertyName IsTestingExclusive -NotePropertyValue $false -Force
         $m | Add-Member -NotePropertyName LastUpdate -NotePropertyValue ([DateTimeOffset]::UtcNow.ToUnixTimeSeconds()) -Force
