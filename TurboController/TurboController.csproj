@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Dalamud.NET.Sdk/15.0.0">
   <PropertyGroup>
-    <Version>1.0.0.0</Version>
+    <Version>1.0.1.0</Version>
     <Platforms>x64</Platforms>
     <Platform>x64</Platform>
     <Author>Uraro</Author>
@@ -10,5 +10,6 @@
     <Description>Allows holding buttons from the cross hotbar (D-Pad + ABXY) to repeatedly attempt to cast on a configurable interval.</Description>
     <RepoUrl>https://github.com/pgtruong/TurboController</RepoUrl>
     <Tags>controller;crossbar;hotbar;turbo</Tags>
+    <IconUrl>https://raw.githubusercontent.com/pgtruong/TurboController/master/images/icon.png</IconUrl>
   </PropertyGroup>
 </Project>

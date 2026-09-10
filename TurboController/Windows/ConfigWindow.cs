@@ -123,8 +123,5 @@ public sealed class ConfigWindow : Window
         ImGui.EndDisabled();
         if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
             ImGui.SetTooltip("Lets an opener repeat before your first hit puts you in combat.");
-
-        ImGui.Separator();
-        ImGui.TextDisabled("Icon by Ayub Irawan - Flaticon");
     }
 }
