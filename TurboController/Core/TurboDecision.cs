@@ -24,9 +24,9 @@ public sealed class TurboSettings
     // How often it should repeat presses.
     public int IntervalMs = 250;
     // The amount of fluctuation, plus or minus the interval ms.
-    public int JitterMs;
+    public int JitterMs = 0;
     // Initial delay before turbo starts.
-    public int InitialDelayMs;
+    public int InitialDelayMs = 250;
     public bool TurboGcds = true;
     public bool TurboOgcds = true;
     public bool TurboOutOfCombat;

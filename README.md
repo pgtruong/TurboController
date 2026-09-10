@@ -6,17 +6,26 @@ A personal project for me as I've had issues with my hands hurting after spammin
 for so long even with a controller. I will try to keep this updated but don't think this will ever 
 make the official Dalamud repo since it may be considered automation.
 
+## Installing
+
+This plugin is not in the official Dalamud repo. To install it from my own repo:
+
+1. `/xlsettings` -> **Experimental** -> **Custom Plugin Repositories**
+2. Add `https://raw.githubusercontent.com/pgtruong/TurboController/master/repo.json` and hit **Save**
+3. `/xlplugins` -> search for **Turbo Controller** -> **Install**
+
 ## Settings
 
 | Setting | Default | What it does |
 |---|---|---|
 | Enable hold to cast | on | Master switch. Off means every button behaves stock. |
-| Repeat interval | 250 ms | Gap between repeats. Floor is 50 ms. |
+| Repeat interval | 250 ms | Gap between repeats. |
 | Repeat variance | 0 ms | Randomises each interval by ± this much. |
-| Initial delay | 0 ms | Gap between your real press and the *first* repeat. |
+| Initial delay | 250 ms | Gap between your real press and the *first* repeat. |
 | GCDs | on | Repeat actions that share the global cooldown. |
 | Off-GCD abilities | on | Repeat abilities on their own cooldown. |
 | Repeat out of combat | off | When off, a held button fires once outside combat. |
+| Repeat with weapons drawn | off | Repeats while your weapon is unsheathed. (To account for first hits) |
 
 Items, macros and emotes always repeat while turbo is on for this version, not sure if I'll add an option for this as well.
 

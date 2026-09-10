@@ -1,0 +1,71 @@
+name: Release
+
+on:
+  push:
+    tags: [ 'v*' ]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-2022
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v5
+      with:
+        ref: master
+        fetch-depth: 0
+
+    - name: Resolve version from tag
+      id: ver
+      run: |
+        $v = "${{ github.ref_name }}" -replace '^v',''
+        "version=$v" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+
+    - name: Install .NET
+      uses: actions/setup-dotnet@v5
+      with:
+        dotnet-version: 10.0.x
+
+    - name: Download Dalamud
+      run: |
+        Invoke-WebRequest -Uri https://goatcorp.github.io/dalamud-distrib/latest.zip -OutFile dalamud.zip
+        Expand-Archive -Force dalamud.zip "$env:AppData\XIVLauncher\addon\Hooks\dev"
+
+    - name: Test with dotnet
+      run: dotnet test .\TurboController.Tests\TurboController.Tests.csproj --configuration Release
+
+    - name: Build with dotnet
+      run: dotnet build .\TurboController\TurboController.csproj --configuration Release -p:Version=${{ steps.ver.outputs.version }}
+
+    - name: Generate repo.json
+      shell: pwsh
+      run: |
+        $out = ".\TurboController\bin\x64\Release\TurboController"
+        $m = Get-Content "$out\TurboController.json" -Raw | ConvertFrom-Json
+        $url = "https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/latest.zip"
+        $m | Add-Member -NotePropertyName DownloadLinkInstall -NotePropertyValue $url -Force
+        $m | Add-Member -NotePropertyName DownloadLinkUpdate  -NotePropertyValue $url -Force
+        $m | Add-Member -NotePropertyName DownloadLinkTesting -NotePropertyValue $url -Force
+        $m | Add-Member -NotePropertyName IsHide -NotePropertyValue $false -Force
+        $m | Add-Member -NotePropertyName IsTestingExclusive -NotePropertyValue $false -Force
+        $m | Add-Member -NotePropertyName LastUpdate -NotePropertyValue ([DateTimeOffset]::UtcNow.ToUnixTimeSeconds()) -Force
+        $m | Add-Member -NotePropertyName DownloadCount -NotePropertyValue 0 -Force
+        ConvertTo-Json $m -Depth 10 -AsArray | Out-File repo.json -Encoding utf8
+
+    - name: Create GitHub release
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: gh release create ${{ github.ref_name }} .\TurboController\bin\x64\Release\TurboController\latest.zip --title ${{ github.ref_name }} --generate-notes
+
+    - name: Commit repo.json
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        git add repo.json
+        if (git status --porcelain repo.json) {
+          git commit -m "Update repo.json for ${{ github.ref_name }}"
+          git push origin HEAD:master
+        }
