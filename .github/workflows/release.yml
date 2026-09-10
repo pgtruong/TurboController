@@ -18,11 +18,15 @@ jobs:
         ref: master
         fetch-depth: 0
 
-    - name: Resolve version from tag
-      id: ver
+    - name: Verify tag matches csproj version
+      shell: pwsh
       run: |
-        $v = "${{ github.ref_name }}" -replace '^v',''
-        "version=$v" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+        $tag = "${{ github.ref_name }}" -replace '^v',''
+        $csproj = Select-Xml -Path .\TurboController\TurboController.csproj -XPath '//Version' | ForEach-Object { $_.Node.InnerText }
+        if ($tag -ne $csproj) {
+          throw "Tag $tag does not match csproj <Version> $csproj. Bump the csproj and re-tag."
+        }
+        Write-Host "Version $csproj matches tag."
 
     - name: Install .NET
       uses: actions/setup-dotnet@v5
@@ -38,7 +42,7 @@ jobs:
       run: dotnet test .\TurboController.Tests\TurboController.Tests.csproj --configuration Release
 
     - name: Build with dotnet
-      run: dotnet build .\TurboController\TurboController.csproj --configuration Release -p:Version=${{ steps.ver.outputs.version }}
+      run: dotnet build .\TurboController\TurboController.csproj --configuration Release
 
     - name: Generate repo.json
       shell: pwsh
