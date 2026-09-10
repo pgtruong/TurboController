@@ -3,7 +3,7 @@
     "Author": "Uraro",
     "Name": "Turbo Controller",
     "InternalName": "TurboController",
-    "AssemblyVersion": "1.0.0.0",
+    "AssemblyVersion": "1.0.1.0",
     "Description": "Allows holding buttons from the cross hotbar (D-Pad + ABXY) to repeatedly attempt to cast on a configurable interval.",
     "ApplicableVersion": "any",
     "RepoUrl": "https://github.com/pgtruong/TurboController",
@@ -20,13 +20,13 @@
     "LoadPriority": 0,
     "Punchline": "Hold skill to cast for controller!",
     "AcceptsFeedback": true,
-    "DownloadLinkInstall": "https://github.com/pgtruong/TurboController/releases/download/v1.0.0.0/latest.zip",
-    "DownloadLinkUpdate": "https://github.com/pgtruong/TurboController/releases/download/v1.0.0.0/latest.zip",
-    "DownloadLinkTesting": "https://github.com/pgtruong/TurboController/releases/download/v1.0.0.0/latest.zip",
+    "DownloadLinkInstall": "https://github.com/pgtruong/TurboController/releases/download/v1.0.1.0/latest.zip",
+    "DownloadLinkUpdate": "https://github.com/pgtruong/TurboController/releases/download/v1.0.1.0/latest.zip",
+    "DownloadLinkTesting": "https://github.com/pgtruong/TurboController/releases/download/v1.0.1.0/latest.zip",
     "IconUrl": "https://raw.githubusercontent.com/pgtruong/TurboController/master/images/icon.png",
     "IsHide": false,
     "IsTestingExclusive": false,
-    "LastUpdate": 1789080714,
+    "LastUpdate": 1789081294,
     "DownloadCount": 0
   }
 ]
